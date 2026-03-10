@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مجابيد">
+<title>مجابيد — البطولة الرمضانية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--gold:#c8973a;--gold2:#e8b86d;--red:#e05555;--green:#4caf7d;--blue:#5b8dee;--purple:#9b6dff;--text:#f5efe0;--muted:#8a7a60;--border:rgba(255,255,255,0.1);--card:rgba(10,10,18,0.88)}
+
+/* Stars background */
+body{background:#05050f;color:var(–text);font-family:‘Tajawal’,sans-serif;min-height:100vh;overscroll-behavior:none;position:relative}
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:20px 14px 80px}
+
+/* Header */
+.header{text-align:center;padding:10px 0 6px}
+.crescent{font-size:48px;margin-bottom:6px;filter:drop-shadow(0 0 20px rgba(200,151,58,0.6));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.title{font-size:38px;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,var(–gold),var(–gold2),#fff8e0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(200,151,58,0.5))}
+.ramadan-label{font-size:12px;color:var(–gold2);letter-spacing:3px;margin:4px 0 2px;opacity:0.8}
+.venue-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 18px;padding:8px 16px;background:rgba(200,151,58,0.08);border:1px solid rgba(200,151,58,0.2);border-radius:30px;font-size:12px;color:var(–gold2)}
+.venue-bar span{color:var(–muted)}
+
+/* Tabs */
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px}
+.tab{border:1px solid var(–border);border-radius:12px;padding:10px 4px;font-family:‘Tajawal’,sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:rgba(255,255,255,0.04);color:var(–muted);text-align:center}
+.tab.active{background:linear-gradient(135deg,var(–gold),var(–gold2));color:#1a1000;border-color:transparent}
+
+/* Cards */
+.card{background:var(–card);border:1px solid var(–border);border-radius:20px;padding:16px;margin-bottom:12px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;overflow:hidden}
+.card::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(–gold),transparent)}
+.card.green::before{background:linear-gradient(90deg,transparent,var(–green),transparent)}
+.card.blue::before{background:linear-gradient(90deg,transparent,var(–blue),transparent)}
+.card.purple::before{background:linear-gradient(90deg,transparent,var(–purple),transparent)}
+.card.red::before{background:linear-gradient(90deg,transparent,var(–red),transparent)}
+.sec-title{font-size:12px;color:var(–muted);letter-spacing:1px;margin-bottom:12px}
+
+/* Prizes */
+.prizes{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.prize-row{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.04);border-radius:14px;border:1px solid var(–border)}
+.prize-medal{font-size:28px;flex-shrink:0}
+.prize-info{flex:1}
+.prize-rank{font-size:11px;color:var(–muted);margin-bottom:3px}
+.prize-val{font-size:15px;font-weight:700;color:var(–text)}
+.prize-val.empty{color:var(–muted);font-style:italic;font-weight:400}
+.prize-edit-btn{background:rgba(200,151,58,0.12);border:1px solid rgba(200,151,58,0.25);color:var(–gold);border-radius:9px;padding:6px 12px;font-family:‘Tajawal’,sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+
+/* Prize edit inline */
+.prize-edit-row{display:none;margin-top:8px;gap:6px}
+.prize-edit-row.show{display:flex}
+.prize-input{flex:1;background:rgba(255,255,255,0.07);border:1px solid var(–border);border-radius:9px;padding:8px 10px;color:var(–text);font-family:‘Tajawal’,sans-serif;font-size:14px;font-weight:700;outline:none}
+.prize-input:focus{border-color:var(–gold)}
+.prize-save{background:linear-gradient(135deg,var(–gold),var(–gold2));color:#1a1000;border:none;border-radius:9px;padding:8px 14px;font-family:‘Tajawal’,sans-serif;font-size:13px;font-weight:900;cursor:pointer}
+
+/* Info boxes */
+.info-box{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(255,255,255,0.04);border-radius:14px;border:1px solid var(–border);margin-bottom:8px}
+.info-icon{font-size:24px;flex-shrink:0}
+.info-content{}
+.info-label{font-size:11px;color:var(–muted);margin-bottom:2px}
+.info-value{font-size:15px;font-weight:700}
+
+/* Emoji picker for teams */
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.emoji-opt{width:36px;height:36px;border-radius:10px;border:1px solid var(–border);background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.emoji-opt.selected{border-color:var(–gold);background:rgba(200,151,58,0.15)}
+
+/* Rules */
+.rule-section{margin-bottom:14px}
+.rule-section-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;color:var(–gold);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(–border)}
+.rule-list{display:flex;flex-direction:column;gap:7px}
+.rule-item{display:flex;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.04);border-radius:11px;align-items:flex-start}
+.rule-num{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(–gold),var(–gold2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#1a1000;flex-shrink:0;margin-top:2px}
+.rule-text{font-size:13px;line-height:1.6}
+.penalty-item{display:flex;gap:10px;padding:9px 12px;background:rgba(224,85,85,0.06);border:1px solid rgba(224,85,85,0.15);border-radius:11px;align-items:flex-start}
+.penalty-num{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(–red),#ff7777);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0;margin-top:2px}
+
+/* Tournament */
+.teams-setup{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.team-setup-row{background:rgba(255,255,255,0.04);border:1px solid var(–border);border-radius:14px;padding:12px}
+.team-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.team-num{font-size:12px;color:var(–muted)}
+.remove-team{background:rgba(224,85,85,0.15);border:1px solid rgba(224,85,85,0.3);color:var(–red);font-size:12px;cursor:pointer;padding:4px 10px;border-radius:8px;font-family:‘Tajawal’,sans-serif;font-weight:700}
+.team-players{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.tinput{width:100%;background:rgba(255,255,255,0.07);border:1px solid var(–border);border-radius:10px;padding:9px 10px;color:var(–text);font-family:‘Tajawal’,sans-serif;font-size:14px;font-weight:700;outline:none}
+.tinput:focus{border-color:var(–gold)}
+.tinput::placeholder{color:var(–muted);font-weight:400;font-size:13px}
+.team-emoji-row{display:flex;gap:6px;align-items:center}
+.team-emoji-label{font-size:11px;color:var(–muted)}
+.emoji-pick{width:32px;height:32px;border-radius:9px;border:1px solid var(–border);background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:border-color 0.15s}
+.emoji-pick.sel{border-color:var(–gold);background:rgba(200,151,58,0.12)}
+.add-team-btn{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(–border);color:var(–text);border-radius:12px;padding:11px;font-family:‘Tajawal’,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.start-btn{width:100%;background:linear-gradient(135deg,var(–gold),var(–gold2));color:#1a1000;border:none;border-radius:12px;padding:13px;font-family:‘Tajawal’,sans-serif;font-size:16px;font-weight:900;cursor:pointer}
+.start-btn:active{opacity:0.85}
+
+/* Match */
+.round-badge{text-align:center;font-size:11px;color:var(–muted);letter-spacing:2px;margin-bottom:4px}
+.match-num{text-align:center;font-size:13px;font-weight:700;color:var(–gold);margin-bottom:16px}
+.versus{display:grid;grid-template-columns:1fr 36px 1fr;gap:6px;align-items:stretch;margin-bottom:14px}
+.team-card{background:rgba(255,255,255,0.05);border:1px solid var(–border);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:80px}
+.tc-emoji{font-size:24px}
+.tc-p1,.tc-p2{font-size:13px;font-weight:900;text-align:center}
+.tc-and{font-size:10px;color:var(–muted)}
+.vs-mid{display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:var(–muted)}
+.win-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.win-btn{border:none;border-radius:12px;padding:13px 6px;font-family:‘Tajawal’,sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:transform 0.1s;line-height:1.4}
+.win-btn:active{transform:scale(0.95)}
+.win-a{background:linear-gradient(135deg,var(–gold),var(–gold2));color:#1a1000}
+.win-b{background:linear-gradient(135deg,var(–blue),#88aaff);color:#fff}
+.waiting-list{display:flex;flex-direction:column;gap:6px}
+.waiting-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:10px}
+.w-pos{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(–muted);font-weight:700;flex-shrink:0}
+.w-name{font-size:12px;font-weight:700}
+.bracket-scroll{overflow-x:auto;padding-bottom:4px}
+.bracket{display:flex;gap:4px;align-items:stretch}
+.bracket-round{display:flex;flex-direction:column;min-width:100px}
+.br-title{font-size:10px;color:var(–muted);text-align:center;padding:4px 0 8px;border-bottom:1px solid var(–border);margin-bottom:6px}
+.br-matches{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:6px;padding:0 2px}
+.br-match{background:rgba(255,255,255,0.04);border:1px solid var(–border);border-radius:10px;padding:7px 8px;min-height:48px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.br-match.active{border-color:var(–gold);background:rgba(200,151,58,0.08)}
+.br-team{font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.br-vs{font-size:9px;color:var(–muted);text-align:center}
+.champ-box{text-align:center;padding:20px 16px}
+.champ-trophy{font-size:64px;margin-bottom:8px}
+.champ-label{font-size:12px;color:var(–muted);margin-bottom:4px}
+.champ-name{font-size:24px;font-weight:900;color:var(–gold)}
+.reset-btn{width:100%;background:transparent;border:1px solid rgba(224,85,85,0.3);color:rgba(224,85,85,0.7);border-radius:11px;padding:12px;font-family:‘Tajawal’,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+.new-btn{width:100%;background:linear-gradient(135deg,var(–gold),var(–gold2));color:#1a1000;border:none;border-radius:11px;padding:12px;font-family:‘Tajawal’,sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-top:4px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(–gold);color:#1a1000;padding:11px 24px;border-radius:30px;font-weight:700;font-size:13px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(200,151,58,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+</style>
+
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<div class="app">
+  <div class="header">
+    <div class="crescent">🌙</div>
+    <div class="title">مجابيد</div>
+    <div class="ramadan-label">البطولة الرمضانية</div>
+    <div class="venue-bar">
+      <span>📍</span> مشب العز &nbsp;|&nbsp; <span>🕌</span> بعد التراويح
+    </div>
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tabs">
+    <button class="tab active" id="tab1" onclick="showTab(1)">🏆 البطولة</button>
+    <button class="tab" id="tab2" onclick="showTab(2)">🎁 الجوائز</button>
+    <button class="tab" id="tab3" onclick="showTab(3)">📋 القوانين</button>
+  </div>
+
+  <!-- TAB 1: TOURNAMENT -->
+
+  <div id="tabContent1">
+    <!-- Setup -->
+    <div id="setupSection">
+      <div class="card green">
+        <div class="sec-title">🃏 أدخل الفرق — كل فريق لاعبين</div>
+        <div class="teams-setup" id="teamsSetup"></div>
+        <button class="add-team-btn" id="addTeamBtn">➕ إضافة فريق</button>
+        <button class="start-btn" id="startBtn">🌙 ابدأ البطولة</button>
+      </div>
+    </div>
+    <!-- Match -->
+    <div id="matchSection" class="hidden">
+      <div class="card blue">
+        <div class="round-badge" id="roundBadge">الدور الأول</div>
+        <div class="match-num" id="matchNum"></div>
+        <div class="versus">
+          <div class="team-card">
+            <div class="tc-emoji" id="tcAEmoji">🃏</div>
+            <div class="tc-p1" id="tcA1"></div>
+            <div class="tc-and">&</div>
+            <div class="tc-p2" id="tcA2"></div>
+          </div>
+          <div class="vs-mid">VS</div>
+          <div class="team-card">
+            <div class="tc-emoji" id="tcBEmoji">🃏</div>
+            <div class="tc-p1" id="tcB1"></div>
+            <div class="tc-and">&</div>
+            <div class="tc-p2" id="tcB2"></div>
+          </div>
+        </div>
+        <div class="win-btns">
+          <button class="win-btn win-a" id="winBtnA">🏆 فريق أ</button>
+          <button class="win-btn win-b" id="winBtnB">🏆 فريق ب</button>
+        </div>
+      </div>
+      <div class="card" id="waitingCard">
+        <div class="sec-title">⏳ قائمة الانتظار</div>
+        <div class="waiting-list" id="waitingList"></div>
+      </div>
+      <div class="card purple">
+        <div class="sec-title">🗂️ البراكيت</div>
+        <div class="bracket-scroll"><div class="bracket" id="bracketView"></div></div>
+      </div>
+      <button class="reset-btn" id="resetBtn">🗑️ إعادة تعيين البطولة</button>
+    </div>
+    <!-- Champ -->
+    <div id="champSection" class="hidden">
+      <div class="card">
+        <div class="champ-box">
+          <div class="champ-trophy">🏆</div>
+          <div class="champ-label">بطل البطولة الرمضانية</div>
+          <div class="champ-name" id="champNameDisplay"></div>
+        </div>
+      </div>
+      <div class="card purple">
+        <div class="sec-title">🗂️ البراكيت النهائي</div>
+        <div class="bracket-scroll"><div class="bracket" id="bracketFinal"></div></div>
+      </div>
+      <button class="new-btn" id="newBtn">🌙 بطولة جديدة</button>
+    </div>
+  </div>
+
+  <!-- TAB 2: PRIZES -->
+
+  <div id="tabContent2" class="hidden">
+    <div class="card">
+      <div class="sec-title">🎁 جوائز البطولة الرمضانية</div>
+      <div class="prizes">
+        <div class="prize-row" id="prizeRow1">
+          <div class="prize-medal">🥇</div>
+          <div class="prize-info">
+            <div class="prize-rank">المركز الأول</div>
+            <div class="prize-val empty" id="prizeVal1">لم تُحدد بعد...</div>
+          </div>
+          <button class="prize-edit-btn" onclick="togglePrizeEdit(1)">✏️ تعديل</button>
+        </div>
+        <div class="prize-edit-row" id="prizeEdit1">
+          <input class="prize-input" id="prizeInput1" placeholder="اكتب الجائزة..." maxlength="50">
+          <button class="prize-save" onclick="savePrize(1)">حفظ</button>
+        </div>
+        <div class="prize-row" id="prizeRow2">
+          <div class="prize-medal">🥈</div>
+          <div class="prize-info">
+            <div class="prize-rank">المركز الثاني</div>
+            <div class="prize-val empty" id="prizeVal2">لم تُحدد بعد...</div>
+          </div>
+          <button class="prize-edit-btn" onclick="togglePrizeEdit(2)">✏️ تعديل</button>
+        </div>
+        <div class="prize-edit-row" id="prizeEdit2">
+          <input class="prize-input" id="prizeInput2" placeholder="اكتب الجائزة..." maxlength="50">
+          <button class="prize-save" onclick="savePrize(2)">حفظ</button>
+        </div>
+        <div class="prize-row" id="prizeRow3">
+          <div class="prize-medal">🥉</div>
+          <div class="prize-info">
+            <div class="prize-rank">المركز الثالث</div>
+            <div class="prize-val empty" id="prizeVal3">لم تُحدد بعد...</div>
+          </div>
+          <button class="prize-edit-btn" onclick="togglePrizeEdit(3)">✏️ تعديل</button>
+        </div>
+        <div class="prize-edit-row" id="prizeEdit3">
+          <input class="prize-input" id="prizeInput3" placeholder="اكتب الجائزة..." maxlength="50">
+          <button class="prize-save" onclick="savePrize(3)">حفظ</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center;padding:20px">
+      <div style="font-size:36px;margin-bottom:8px">🌙✨</div>
+      <div style="font-size:14px;color:var(--gold2);font-weight:700">مشب العز — بعد التراويح</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">رمضان كريم 🎴</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: RULES -->
+
+  <div id="tabContent3" class="hidden">
+    <div class="card">
+      <div class="rule-section">
+        <div class="rule-section-title">🃏 أولاً — التوزيع</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">١</div><div class="rule-text">الكروت تُوزَّع أمام الجميع بشكل واضح</div></div>
+          <div class="rule-item"><div class="rule-num">٢</div><div class="rule-text">ممنوع لمس الكروت قبل انتهاء التوزيعة</div></div>
+          <div class="rule-item"><div class="rule-num">٣</div><div class="rule-text">اللي يوزع يتغير كل جولة بالترتيب</div></div>
+          <div class="rule-item"><div class="rule-num">٤</div><div class="rule-text">لو وقع كرت أثناء التوزيع — تُعاد التوزيعة كاملة</div></div>
+          <div class="rule-item"><div class="rule-num">٥</div><div class="rule-text">ممنوع النظر في كروت الغير أثناء التوزيع</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="rule-section">
+        <div class="rule-section-title">🤝 ثانياً — الشراكة</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">٦</div><div class="rule-text">ممنوع الكلام مع شريكك عن كروتك بأي طريقة</div></div>
+          <div class="rule-item"><div class="rule-num">٧</div><div class="rule-text">ممنوع الإشارة أو الإيماء أو الغمز لشريكك</div></div>
+          <div class="rule-item"><div class="rule-num">٨</div><div class="rule-text">ممنوع تكرار لعب معين بشكل مقصود كإشارة</div></div>
+          <div class="rule-item"><div class="rule-num">٩</div><div class="rule-text">ممنوع التعليق على كروت الخصم</div></div>
+          <div class="rule-item"><div class="rule-num">١٠</div><div class="rule-text">لو انكسر القانون — الجولة تروح للخصم مباشرة</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="rule-section">
+        <div class="rule-section-title">🎴 ثالثاً — اللعب</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">١١</div><div class="rule-text">الكرت اللي يخرج من الإيد يُعتبر لعب نهائي</div></div>
+          <div class="rule-item"><div class="rule-num">١٢</div><div class="rule-text">ممنوع التراجع عن كرت بعد ما يلمس الطاولة</div></div>
+          <div class="rule-item"><div class="rule-num">١٣</div><div class="rule-text">يجي دورك بالترتيب — ممنوع اللعب قبل دورك</div></div>
+          <div class="rule-item"><div class="rule-num">١٤</div><div class="rule-text">ممنوع رؤية كروت الفريق الثاني بأي حجة</div></div>
+          <div class="rule-item"><div class="rule-num">١٥</div><div class="rule-text">لو لاعب شاف كرت غيره بالخطأ — يُعلن فوراً</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="rule-section">
+        <div class="rule-section-title">📊 رابعاً — العد والنقاط</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">١٦</div><div class="rule-text">العد يصير أمام الكل في نهاية كل جولة</div></div>
+          <div class="rule-item"><div class="rule-num">١٧</div><div class="rule-text">أي خلاف في العد — يُعاد من البداية</div></div>
+          <div class="rule-item"><div class="rule-num">١٨</div><div class="rule-text">النتيجة تُسجَّل فور انتهاء الجولة بدون تأخير</div></div>
+          <div class="rule-item"><div class="rule-num">١٩</div><div class="rule-text">ممنوع التشكيك في النتائج بعد ما تُسجَّل</div></div>
+          <div class="rule-item"><div class="rule-num">٢٠</div><div class="rule-text">النقاط تُعرض على الجميع قبل الجولة التالية</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card red">
+      <div class="rule-section">
+        <div class="rule-section-title">⚖️ خامساً — التحكيم والعقوبات</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">٢١</div><div class="rule-text">يُعيَّن حكم محايد للبطولة كاملة</div></div>
+          <div class="rule-item"><div class="rule-num">٢٢</div><div class="rule-text">كلمة الحكم نهائية ولا تُناقش أثناء اللعب</div></div>
+          <div class="rule-item"><div class="rule-num">٢٣</div><div class="rule-text">أي احتجاج يكون بهدوء وبعد انتهاء اليد</div></div>
+          <div class="penalty-item"><div class="penalty-num">١</div><div class="rule-text">تحذير — أول مخالفة</div></div>
+          <div class="penalty-item"><div class="penalty-num">٢</div><div class="rule-text">خسارة الجولة — ثاني مخالفة</div></div>
+          <div class="penalty-item"><div class="penalty-num">٣</div><div class="rule-text">الطرد من البطولة — ثالث مخالفة</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="rule-section">
+        <div class="rule-section-title">🌙 سادساً — آداب اللعب</div>
+        <div class="rule-list">
+          <div class="rule-item"><div class="rule-num">٢٤</div><div class="rule-text">ممنوع الإساءة أو الشتم تحت أي ظرف</div></div>
+          <div class="rule-item"><div class="rule-num">٢٥</div><div class="rule-text">الفايز لا يُعير والخاسر لا يُعتذر بشكل مبالغ</div></div>
+          <div class="rule-item"><div class="rule-num">٢٦</div><div class="rule-text">ممنوع مغادرة الطاولة أثناء الجولة بدون إذن</div></div>
+          <div class="rule-item"><div class="rule-num">٢٧</div><div class="rule-text">اللعب بروح رياضية — الهدف المتعة والترفيه 🎴</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STARS =====
+(function() {
+  var c = document.getElementById('stars-canvas');
+  var ctx = c.getContext('2d');
+  var stars = [];
+  function resize() { c.width=window.innerWidth; c.height=window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for(var i=0;i<180;i++) {
+    stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.4+0.3,o:Math.random()*0.7+0.2,s:Math.random()*0.5+0.3,t:Math.random()*Math.PI*2});
+  }
+  function draw() {
+    ctx.clearRect(0,0,c.width,c.height);
+    var t=Date.now()/1000;
+    for(var i=0;i<stars.length;i++) {
+      var s=stars[i];
+      var alpha=s.o*(0.6+0.4*Math.sin(t*s.s+s.t));
+      ctx.beginPath();
+      ctx.arc(s.x*c.width, s.y*c.height, s.r, 0, Math.PI*2);
+      ctx.fillStyle='rgba(255,248,220,'+alpha+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== TABS =====
+function showTab(n) {
+  for(var i=1;i<=3;i++) {
+    document.getElementById('tabContent'+i).classList.toggle('hidden', i!==n);
+    document.getElementById('tab'+i).classList.toggle('active', i===n);
+  }
+}
+
+// ===== PRIZES =====
+var prizes = JSON.parse(localStorage.getItem('mjb_prizes')||'{}');
+(function() {
+  for(var i=1;i<=3;i++) {
+    if(prizes[i]) {
+      var el = document.getElementById('prizeVal'+i);
+      el.textContent = prizes[i];
+      el.classList.remove('empty');
+    }
+  }
+})();
+function togglePrizeEdit(n) {
+  var row = document.getElementById('prizeEdit'+n);
+  var isShow = row.classList.contains('show');
+  for(var i=1;i<=3;i++) document.getElementById('prizeEdit'+i).classList.remove('show');
+  if(!isShow) {
+    row.classList.add('show');
+    document.getElementById('prizeInput'+n).value = prizes[n]||'';
+    document.getElementById('prizeInput'+n).focus();
+  }
+}
+function savePrize(n) {
+  var val = document.getElementById('prizeInput'+n).value.trim();
+  if(!val) return;
+  prizes[n] = val;
+  localStorage.setItem('mjb_prizes', JSON.stringify(prizes));
+  var el = document.getElementById('prizeVal'+n);
+  el.textContent = val;
+  el.classList.remove('empty');
+  document.getElementById('prizeEdit'+n).classList.remove('show');
+  toast('تم حفظ الجائزة ✅');
+}
+
+// ===== TOURNAMENT =====
+var EMOJIS = ['🌊','🔥','⚡','🦁','🐯','👑','🎯','🗡️','🛡️','🦅'];
+var teams = [];
+var bracket = [];
+var currentRound = 0;
+var currentMatch = 0;
+
+document.getElementById('addTeamBtn').onclick = addTeamRow;
+document.getElementById('startBtn').onclick = startTournament;
+document.getElementById('resetBtn').onclick = doReset;
+document.getElementById('newBtn').onclick = doReset;
+document.getElementById('winBtnA').onclick = function(){ recordWin(0); };
+document.getElementById('winBtnB').onclick = function(){ recordWin(1); };
+
+for(var i=0;i<4;i++) addTeamRow();
+
+function addTeamRow() {
+  var c = document.getElementById('teamsSetup');
+  var n = c.children.length + 1;
+  var div = document.createElement('div');
+  div.className = 'team-setup-row';
+  var emojiHTML = '';
+  for(var e=0;e<EMOJIS.length;e++) {
+    emojiHTML += '<div class="emoji-pick'+(e===0?' sel':'')+'" data-emoji="'+EMOJIS[e]+'">'+EMOJIS[e]+'</div>';
+  }
+  div.innerHTML =
+    '<div class="team-row-header">' +
+      '<span class="team-num">فريق '+n+'</span>' +
+      '<button class="remove-team">✕ حذف</button>' +
+    '</div>' +
+    '<div class="team-players">' +
+      '<input class="tinput p1input" placeholder="لاعب ١" maxlength="12">' +
+      '<input class="tinput p2input" placeholder="لاعب ٢" maxlength="12">' +
+    '</div>' +
+    '<div class="team-emoji-row">' +
+      '<span class="team-emoji-label">إيموجي الفريق:</span>' +
+      emojiHTML +
+    '</div>';
+  div.querySelector('.remove-team').onclick = function(){ div.remove(); renumberTeams(); };
+  var picks = div.querySelectorAll('.emoji-pick');
+  for(var p=0;p<picks.length;p++) {
+    picks[p].onclick = (function(picks, btn) {
+      return function() {
+        for(var x=0;x<picks.length;x++) picks[x].classList.remove('sel');
+        btn.classList.add('sel');
+      };
+    })(picks, picks[p]);
+  }
+  c.appendChild(div);
+}
+
+function renumberTeams() {
+  var rows = document.querySelectorAll('.team-setup-row');
+  for(var i=0;i<rows.length;i++) rows[i].querySelector('.team-num').textContent = 'فريق '+(i+1);
+}
+
+function startTournament() {
+  var rows = document.querySelectorAll('.team-setup-row');
+  var parsed = [];
+  for(var i=0;i<rows.length;i++) {
+    var p1 = rows[i].querySelector('.p1input').value.trim();
+    var p2 = rows[i].querySelector('.p2input').value.trim();
+    if(!p1 && !p2) continue;
+    if(!p1 || !p2) { toast('كل فريق يحتاج لاعبين!'); return; }
+    var selEmoji = rows[i].querySelector('.emoji-pick.sel');
+    var emoji = selEmoji ? selEmoji.getAttribute('data-emoji') : '🃏';
+    parsed.push({p1:p1, p2:p2, emoji:emoji});
+  }
+  if(parsed.length < 2) { toast('أضف فريقين على الأقل!'); return; }
+  teams = parsed.slice().sort(function(){ return Math.random()-0.5; });
+  bracket = [];
+  var r0 = [];
+  for(var i=0;i<teams.length-1;i+=2) r0.push({a:teams[i],b:teams[i+1],winner:null});
+  if(teams.length%2!==0) r0.push({a:teams[teams.length-1],b:null,winner:teams[teams.length-1]});
+  bracket.push(r0);
+  currentRound=0; currentMatch=0;
+  skipByes();
+  document.getElementById('setupSection').classList.add('hidden');
+  document.getElementById('matchSection').classList.remove('hidden');
+  renderAll();
+}
+
+function skipByes() {
+  var r = bracket[currentRound];
+  while(currentMatch < r.length && r[currentMatch].b===null) currentMatch++;
+  if(currentMatch >= r.length) advanceRound();
+}
+
+function advanceRound() {
+  var r = bracket[currentRound];
+  var winners = [];
+  for(var i=0;i<r.length;i++) if(r[i].winner) winners.push(r[i].winner);
+  if(winners.length===1) { showChamp(winners[0]); return; }
+  var nr = [];
+  for(var i=0;i<winners.length-1;i+=2) nr.push({a:winners[i],b:winners[i+1],winner:null});
+  if(winners.length%2!==0) nr.push({a:winners[winners.length-1],b:null,winner:winners[winners.length-1]});
+  bracket.push(nr);
+  currentRound++; currentMatch=0;
+  skipByes();
+}
+
+function recordWin(side) {
+  var match = bracket[currentRound][currentMatch];
+  match.winner = side===0 ? match.a : match.b;
+  var wname = match.winner.emoji+' '+match.winner.p1+' و '+match.winner.p2;
+  currentMatch++;
+  var r = bracket[currentRound];
+  var hasMore = false;
+  for(var i=currentMatch;i<r.length;i++) if(r[i].b!==null){ hasMore=true; break; }
+  if(!hasMore) advanceRound();
+  renderAll();
+  toast(wname + ' فازوا! 🏆');
+}
+
+function renderAll() {
+  renderCurrentMatch();
+  renderWaiting();
+  renderBracketView('bracketView');
+}
+
+function renderCurrentMatch() {
+  if(currentRound>=bracket.length) return;
+  var r=bracket[currentRound];
+  if(currentMatch>=r.length) return;
+  var match=r[currentMatch];
+  var rLabels=['الدور الأول','الـ١٦','ربع النهائي','نصف النهائي','النهائي'];
+  document.getElementById('roundBadge').textContent=rLabels[currentRound]||('الدور '+(currentRound+1));
+  var total=0,done=0;
+  for(var i=0;i<r.length;i++){ if(r[i].b!==null) total++; if(r[i].winner!==null&&r[i].b!==null) done++; }
+  document.getElementById('matchNum').textContent='مباراة '+(done+1)+' من '+total;
+  document.getElementById('tcAEmoji').textContent=match.a.emoji||'🃏';
+  document.getElementById('tcA1').textContent=match.a.p1;
+  document.getElementById('tcA2').textContent=match.a.p2;
+  document.getElementById('tcBEmoji').textContent=match.b.emoji||'🃏';
+  document.getElementById('tcB1').textContent=match.b.p1;
+  document.getElementById('tcB2').textContent=match.b.p2;
+  document.getElementById('winBtnA').textContent=match.a.emoji+' '+match.a.p1+' فازوا';
+  document.getElementById('winBtnB').textContent=match.b.emoji+' '+match.b.p1+' فازوا';
+}
+
+function renderWaiting() {
+  var r=bracket[currentRound];
+  var waiting=[];
+  for(var i=currentMatch+1;i<r.length;i++) if(r[i].b!==null) waiting.push(r[i]);
+  var wCard=document.getElementById('waitingCard');
+  if(!waiting.length){ wCard.classList.add('hidden'); return; }
+  wCard.classList.remove('hidden');
+  var html='';
+  for(var i=0;i<waiting.length;i++){
+    var m=waiting[i];
+    html+='<div class="waiting-item"><div class="w-pos">'+(i+1)+'</div><div class="w-name">'+m.a.emoji+' '+m.a.p1+' & '+m.a.p2+' <span style="color:var(--muted)">ضد</span> '+m.b.emoji+' '+m.b.p1+' & '+m.b.p2+'</div></div>';
+  }
+  document.getElementById('waitingList').innerHTML=html;
+}
+
+function renderBracketView(id) {
+  var container=document.getElementById(id);
+  var rLabels=['الدور١','الـ١٦','الربع','النصف','النهائي'];
+  var html='';
+  for(var ri=0;ri<bracket.length;ri++){
+    var round=bracket[ri];
+    var label=rLabels[ri]||('R'+(ri+1));
+    var mhtml='';
+    for(var mi=0;mi<round.length;mi++){
+      var m=round[mi];
+      var isActive=(ri===currentRound&&mi===currentMatch);
+      var cls='br-match'+(isActive?' active':'');
+      if(!m.b){
+        mhtml+='<div class="'+cls+'"><div class="br-team" style="color:var(--gold)">'+m.a.emoji+' '+m.a.p1+'</div><div class="br-vs">تأهل</div></div>';
+      } else {
+        var aStyle=m.winner?(m.winner===m.a?'color:var(--gold)':'color:var(--muted);text-decoration:line-through'):'';
+        var bStyle=m.winner?(m.winner===m.b?'color:var(--gold)':'color:var(--muted);text-decoration:line-through'):'';
+        mhtml+='<div class="'+cls+'"><div class="br-team" style="'+aStyle+'">'+m.a.emoji+' '+m.a.p1+'</div><div class="br-vs">vs</div><div class="br-team" style="'+bStyle+'">'+m.b.emoji+' '+m.b.p1+'</div></div>';
+      }
+    }
+    html+='<div class="bracket-round"><div class="br-title">'+label+'</div><div class="br-matches">'+mhtml+'</div></div>';
+  }
+  container.innerHTML=html;
+}
+
+function showChamp(team) {
+  document.getElementById('matchSection').classList.add('hidden');
+  document.getElementById('champSection').classList.remove('hidden');
+  document.getElementById('champNameDisplay').textContent=team.emoji+' '+team.p1+' و '+team.p2+' 🎉';
+  renderBracketView('bracketFinal');
+}
+
+function doReset() {
+  teams=[]; bracket=[]; currentRound=0; currentMatch=0;
+  document.getElementById('setupSection').classList.remove('hidden');
+  document.getElementById('matchSection').classList.add('hidden');
+  document.getElementById('champSection').classList.add('hidden');
+  var c=document.getElementById('teamsSetup');
+  c.innerHTML='';
+  for(var i=0;i<4;i++) addTeamRow();
+  toast('جاهز لبطولة جديدة 🌙');
+}
+
+function toast(m) {
+  var el=document.getElementById('toast');
+  el.textContent=m; el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); },2500);
+}
+</script>
+
+</body>
+</html>
